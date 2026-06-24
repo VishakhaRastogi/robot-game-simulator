@@ -1,14 +1,26 @@
-type BoardProps = {
+export type BoardDimensions = {
   x: number;
   y: number;
 };
 
+type BoardProps = {
+  dimensions: BoardDimensions;
+  robot: any;
+};
+
 function Board(props: BoardProps) {
+  let { dimensions, robot } = props;
+  let { x, y } = dimensions;
+
   const prepareBoard = (x: number, y: number) => {
     let board = [];
     for (let i = x - 1; i >= 0; i--) {
       let row = [];
       for (let j = 0; j < y; j++) {
+        if (robot && robot.x == j && robot.y == i) {
+          row.push("true");
+          continue;
+        }
         row.push([j, i]);
       }
       board.push(row);
@@ -23,7 +35,7 @@ function Board(props: BoardProps) {
                 {row.map((cell) => {
                   return (
                     <span key={cell.toString()} style={{ padding: "5px" }}>
-                      #{cell}
+                      {cell == "true" ? "robo" : "#" + cell}
                     </span>
                   );
                 })}
@@ -45,7 +57,7 @@ function Board(props: BoardProps) {
           padding: "10px",
         }}
       >
-        {prepareBoard(props.x, props.y)}
+        {prepareBoard(x, y)}
       </section>
     </>
   );
