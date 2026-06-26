@@ -1,19 +1,28 @@
+import { useState } from "react";
 import "./App.css";
-import Board from "./components/Board";
+import Board, { type BoardDimensions } from "./components/Board";
 import InputPanel from "./components/InputPanel";
 import OutputPanel from "./components/OutputPanel";
 
 function App() {
-  const boardDimensions = {
+  const [robotSate, setRobotSate] = useState<any>(null);
+  const dimensions: BoardDimensions = {
     x: 5,
     y: 5,
+  };
+
+  const onUpdateRobotState = (x: number, y: number, direction: string) => {
+    setRobotSate({ x: x, y: y, direction: direction });
   };
 
   return (
     <>
       Robot Game
-      <InputPanel />
-      <Board x={boardDimensions.x} y={boardDimensions.y} />
+      <InputPanel
+        boardDimensions={dimensions}
+        updateRobotState={onUpdateRobotState}
+      />
+      <Board dimensions={dimensions} robot={robotSate} />
       <OutputPanel />
     </>
   );
