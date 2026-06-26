@@ -72,23 +72,83 @@ function InputPanel(props: InputPanelProps) {
             })}
           </select>
         </div>
-        <button
-          onClick={() =>
-            updateRobotState(selectedX, selectedY, selectedDirection)
-          }
-        >
-          Done
-        </button>
       </>
     );
+  };
+
+  const isInputPending = () => {
+    switch (selectedCommand) {
+      case commands[0]:
+        return selectedX == "" || selectedY == "" || selectedDirection == "";
+      case commands[1]:
+        return false;
+      default:
+        return true;
+    }
   };
 
   const showArgs = () => {
     switch (selectedCommand) {
       case commands[0]:
         return placeArgs();
+      case commands[1]:
       default:
         return <></>;
+    }
+  };
+
+  const handleCommand = () => {
+    switch (selectedCommand) {
+      case commands[0]:
+        updateRobotState(selectedX, selectedY, selectedDirection);
+        break;
+      case commands[1]:
+        switch (selectedDirection) {
+          case directions[0]: //north
+            {
+              let newY = parseInt(selectedY) + 1;
+              if (newY < boardDimensions.y) {
+                updateRobotState(selectedX, newY, selectedDirection);
+              } else {
+                alert("Invalid attempt !!!");
+              }
+            }
+            break;
+          case directions[1]: //east
+            {
+              let newX = parseInt(selectedX) + 1;
+              if (newX < boardDimensions.x) {
+                updateRobotState(newX, selectedY, selectedDirection);
+              } else {
+                alert("Invalid attempt !!!");
+              }
+            }
+            break;
+          case directions[2]: //south
+            {
+              let newY = parseInt(selectedY) - 1;
+              if (0 <= newY) {
+                updateRobotState(selectedX, newY, selectedDirection);
+              } else {
+                alert("Invalid attempt !!!");
+              }
+            }
+            break;
+          case directions[3]:
+            {
+              //west
+              let newX = parseInt(selectedX) - 1;
+              if (0 < newX) {
+                updateRobotState(newX, selectedY, selectedDirection);
+              } else {
+                alert("Invalid attempt !!!");
+              }
+            }
+            break;
+        }
+        break;
+      default:
+        alert("Invalid attempt !!!");
     }
   };
 
@@ -107,6 +167,9 @@ function InputPanel(props: InputPanelProps) {
           </select>
         </div>
         {showArgs()}
+        <button disabled={isInputPending()} onClick={handleCommand}>
+          Done
+        </button>
       </section>
     </>
   );
