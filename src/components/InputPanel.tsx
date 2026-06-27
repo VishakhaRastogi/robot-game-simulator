@@ -1,13 +1,15 @@
 import { useState } from "react";
 import type { BoardDimensions } from "./Board";
+import type { RobotState } from "../App";
 
 type InputPanelProps = {
   boardDimensions: BoardDimensions;
   updateRobotState: Function;
+  robotState: null | RobotState;
 };
 
 function InputPanel(props: InputPanelProps) {
-  let { boardDimensions, updateRobotState } = props;
+  let { boardDimensions, updateRobotState, robotState } = props;
   let commands = ["PLACE", "MOVE"];
   let directions = ["NORTH", "EAST", "SOUTH", "WEST"];
   let xValues = Array.from({ length: boardDimensions.x }, (_, index) => index);
@@ -22,6 +24,9 @@ function InputPanel(props: InputPanelProps) {
   const onChangeCommand = (event: any) => {
     console.log(event);
     setSelectedCommand(event.target.value);
+    setSelectedDirection("");
+    setSelectedX("");
+    setSelectedY("");
   };
 
   const placeArgs = () => {
@@ -81,6 +86,10 @@ function InputPanel(props: InputPanelProps) {
       case commands[0]:
         return selectedX == "" || selectedY == "" || selectedDirection == "";
       case commands[1]:
+        if (!robotState) {
+          alert("Robot is not yet placed !!!");
+          return true;
+        }
         return false;
       default:
         return true;
@@ -103,12 +112,16 @@ function InputPanel(props: InputPanelProps) {
         updateRobotState(selectedX, selectedY, selectedDirection);
         break;
       case commands[1]:
-        switch (selectedDirection) {
+        if (!robotState) {
+          alert("Robot is not yet placed !!!");
+          break;
+        }
+        switch (robotState.direction) {
           case directions[0]: //north
             {
-              let newY = parseInt(selectedY) + 1;
+              let newY = robotState.y + 1;
               if (newY < boardDimensions.y) {
-                updateRobotState(selectedX, newY, selectedDirection);
+                updateRobotState(robotState.x, newY, robotState.direction);
               } else {
                 alert("Invalid attempt !!!");
               }
@@ -116,9 +129,9 @@ function InputPanel(props: InputPanelProps) {
             break;
           case directions[1]: //east
             {
-              let newX = parseInt(selectedX) + 1;
+              let newX = robotState.x + 1;
               if (newX < boardDimensions.x) {
-                updateRobotState(newX, selectedY, selectedDirection);
+                updateRobotState(newX, robotState.y, robotState.direction);
               } else {
                 alert("Invalid attempt !!!");
               }
@@ -126,9 +139,9 @@ function InputPanel(props: InputPanelProps) {
             break;
           case directions[2]: //south
             {
-              let newY = parseInt(selectedY) - 1;
+              let newY = robotState.y - 1;
               if (0 <= newY) {
-                updateRobotState(selectedX, newY, selectedDirection);
+                updateRobotState(robotState.x, newY, robotState.direction);
               } else {
                 alert("Invalid attempt !!!");
               }
@@ -137,9 +150,9 @@ function InputPanel(props: InputPanelProps) {
           case directions[3]:
             {
               //west
-              let newX = parseInt(selectedX) - 1;
+              let newX = robotState.x - 1;
               if (0 < newX) {
-                updateRobotState(newX, selectedY, selectedDirection);
+                updateRobotState(newX, robotState.y, robotState.direction);
               } else {
                 alert("Invalid attempt !!!");
               }
