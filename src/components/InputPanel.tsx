@@ -17,36 +17,33 @@ function InputPanel(props: InputPanelProps) {
 
   const [selectedCommand, setSelectedCommand] = useState("");
 
-  const [selectedX, setSelectedX] = useState("");
-  const [selectedY, setSelectedY] = useState("");
-  const [selectedDirection, setSelectedDirection] = useState("");
+  const [placeArgs, setPlaceArgs] = useState<null | Partial<RobotState>>(null);
 
   const onChangeCommand = (event: any) => {
-    console.log(event);
     setSelectedCommand(event.target.value);
-    setSelectedDirection("");
-    setSelectedX("");
-    setSelectedY("");
+    setPlaceArgs(null);
   };
 
-  const placeArgs = () => {
-    const onChangeX = (event: any) => {
-      console.log(event);
-      setSelectedX(event.target.value);
+  const showPlaceArgs = () => {
+    const onChangeValue = (event: any) => {
+      let name = event.target.name;
+      let value = event.target.value;
+      if (name == "x" || name == "y") value = parseInt(value);
+      setPlaceArgs((prev) => {
+        if (prev) return { ...prev, [name]: value };
+        else return { [name]: value };
+      });
     };
-    const onChangeY = (event: any) => {
-      console.log(event);
-      setSelectedY(event.target.value);
-    };
-    const onChangeDirection = (event: any) => {
-      console.log(event);
-      setSelectedDirection(event.target.value);
-    };
+
     return (
       <>
         <div className="field field-x">
           <label>X</label>
-          <select defaultValue={selectedX} onChange={onChangeX}>
+          <select
+            name="x"
+            defaultValue={placeArgs?.x || ""}
+            onChange={onChangeValue}
+          >
             <option value={""} disabled selected hidden>
               Please select value of x
             </option>
@@ -57,7 +54,7 @@ function InputPanel(props: InputPanelProps) {
         </div>
         <div className="field field-y">
           <label>Y</label>
-          <select defaultValue={selectedY} onChange={onChangeY}>
+          <select name="y" defaultValue={placeArgs?.y} onChange={onChangeValue}>
             <option value={""} disabled selected hidden>
               Please select value of y
             </option>
@@ -68,7 +65,11 @@ function InputPanel(props: InputPanelProps) {
         </div>
         <div className="field field-direction">
           <label>Direction</label>
-          <select defaultValue={selectedDirection} onChange={onChangeDirection}>
+          <select
+            name="direction"
+            defaultValue={placeArgs?.direction}
+            onChange={onChangeValue}
+          >
             <option value={""} disabled selected hidden>
               Please select direction
             </option>
@@ -84,7 +85,9 @@ function InputPanel(props: InputPanelProps) {
   const isInputPending = () => {
     switch (selectedCommand) {
       case commands[0]:
-        return selectedX == "" || selectedY == "" || selectedDirection == "";
+        return (
+          !placeArgs || !placeArgs?.x || !placeArgs?.y || !placeArgs?.direction
+        );
       case commands[1]:
         if (!robotState) {
           alert("Robot is not yet placed !!!");
@@ -99,7 +102,7 @@ function InputPanel(props: InputPanelProps) {
   const showArgs = () => {
     switch (selectedCommand) {
       case commands[0]:
-        return placeArgs();
+        return showPlaceArgs();
       case commands[1]:
       default:
         return <></>;
@@ -109,7 +112,8 @@ function InputPanel(props: InputPanelProps) {
   const handleCommand = () => {
     switch (selectedCommand) {
       case commands[0]:
-        updateRobotState(selectedX, selectedY, selectedDirection);
+        if (placeArgs && placeArgs.x && placeArgs.y && placeArgs.direction)
+          updateRobotState(placeArgs.x, placeArgs.y, placeArgs.direction);
         break;
       case commands[1]:
         if (!robotState) {
@@ -151,7 +155,7 @@ function InputPanel(props: InputPanelProps) {
             {
               //west
               let newX = robotState.x - 1;
-              if (0 < newX) {
+              if (0 <= newX) {
                 updateRobotState(newX, robotState.y, robotState.direction);
               } else {
                 alert("Invalid attempt !!!");
@@ -170,7 +174,11 @@ function InputPanel(props: InputPanelProps) {
       <section id="InputPanel">
         <div className="field field-command">
           <label>Command</label>
-          <select defaultValue={selectedCommand} onChange={onChangeCommand}>
+          <select
+            name="command"
+            defaultValue={selectedCommand}
+            onChange={onChangeCommand}
+          >
             <option value={""} disabled selected hidden>
               Please select command
             </option>
