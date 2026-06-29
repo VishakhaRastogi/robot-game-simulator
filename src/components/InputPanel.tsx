@@ -10,8 +10,17 @@ type InputPanelProps = {
 
 function InputPanel(props: InputPanelProps) {
   let { boardDimensions, updateRobotState, robotState } = props;
-  let commands = ["PLACE", "MOVE"];
-  let directions = ["NORTH", "EAST", "SOUTH", "WEST"];
+  let commands = {
+    PLACE: "PLACE",
+    MOVE: "MOVE",
+  };
+
+  let directions = {
+    NORTH: "NORTH",
+    EAST: "EAST",
+    SOUTH: "SOUTH",
+    WEST: "WEST",
+  };
   let xValues = Array.from({ length: boardDimensions.x }, (_, index) => index);
   let yValues = Array.from({ length: boardDimensions.y }, (_, index) => index);
 
@@ -44,7 +53,7 @@ function InputPanel(props: InputPanelProps) {
             defaultValue={placeArgs?.x || ""}
             onChange={onChangeValue}
           >
-            <option value={""} disabled selected hidden>
+            <option value={""} disabled hidden>
               Please select value of x
             </option>
             {xValues.map((x) => {
@@ -54,8 +63,12 @@ function InputPanel(props: InputPanelProps) {
         </div>
         <div className="field field-y">
           <label>Y</label>
-          <select name="y" defaultValue={placeArgs?.y} onChange={onChangeValue}>
-            <option value={""} disabled selected hidden>
+          <select
+            name="y"
+            defaultValue={placeArgs?.y || ""}
+            onChange={onChangeValue}
+          >
+            <option value={""} disabled hidden>
               Please select value of y
             </option>
             {yValues.map((y) => {
@@ -67,13 +80,13 @@ function InputPanel(props: InputPanelProps) {
           <label>Direction</label>
           <select
             name="direction"
-            defaultValue={placeArgs?.direction}
+            defaultValue={placeArgs?.direction || ""}
             onChange={onChangeValue}
           >
-            <option value={""} disabled selected hidden>
+            <option value={""} disabled hidden>
               Please select direction
             </option>
-            {directions.map((direction) => {
+            {Object.keys(directions).map((direction) => {
               return <option value={direction}>{direction}</option>;
             })}
           </select>
@@ -84,11 +97,14 @@ function InputPanel(props: InputPanelProps) {
 
   const isInputPending = () => {
     switch (selectedCommand) {
-      case commands[0]:
+      case commands.PLACE:
         return (
-          !placeArgs || !placeArgs?.x || !placeArgs?.y || !placeArgs?.direction
+          !placeArgs ||
+          (!placeArgs?.x && placeArgs?.x != 0) ||
+          (!placeArgs?.y && placeArgs?.y != 0) ||
+          !placeArgs?.direction
         );
-      case commands[1]:
+      case commands.MOVE:
         if (!robotState) {
           alert("Robot is not yet placed !!!");
           return true;
@@ -101,9 +117,9 @@ function InputPanel(props: InputPanelProps) {
 
   const showArgs = () => {
     switch (selectedCommand) {
-      case commands[0]:
+      case commands.PLACE:
         return showPlaceArgs();
-      case commands[1]:
+      case commands.MOVE:
       default:
         return <></>;
     }
@@ -111,17 +127,22 @@ function InputPanel(props: InputPanelProps) {
 
   const handleCommand = () => {
     switch (selectedCommand) {
-      case commands[0]:
-        if (placeArgs && placeArgs.x && placeArgs.y && placeArgs.direction)
+      case commands.PLACE:
+        if (
+          placeArgs &&
+          placeArgs.x != undefined &&
+          placeArgs.y != undefined &&
+          placeArgs.direction
+        )
           updateRobotState(placeArgs.x, placeArgs.y, placeArgs.direction);
         break;
-      case commands[1]:
+      case commands.MOVE:
         if (!robotState) {
           alert("Robot is not yet placed !!!");
           break;
         }
         switch (robotState.direction) {
-          case directions[0]: //north
+          case directions.NORTH: //north
             {
               let newY = robotState.y + 1;
               if (newY < boardDimensions.y) {
@@ -131,7 +152,7 @@ function InputPanel(props: InputPanelProps) {
               }
             }
             break;
-          case directions[1]: //east
+          case directions.EAST: //east
             {
               let newX = robotState.x + 1;
               if (newX < boardDimensions.x) {
@@ -141,7 +162,7 @@ function InputPanel(props: InputPanelProps) {
               }
             }
             break;
-          case directions[2]: //south
+          case directions.SOUTH: //south
             {
               let newY = robotState.y - 1;
               if (0 <= newY) {
@@ -151,7 +172,7 @@ function InputPanel(props: InputPanelProps) {
               }
             }
             break;
-          case directions[3]:
+          case directions.WEST:
             {
               //west
               let newX = robotState.x - 1;
@@ -179,10 +200,10 @@ function InputPanel(props: InputPanelProps) {
             defaultValue={selectedCommand}
             onChange={onChangeCommand}
           >
-            <option value={""} disabled selected hidden>
+            <option value={""} disabled hidden>
               Please select command
             </option>
-            {commands.map((cmd) => {
+            {Object.keys(commands).map((cmd) => {
               return <option value={cmd}>{cmd}</option>;
             })}
           </select>
