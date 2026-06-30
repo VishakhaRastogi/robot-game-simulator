@@ -13,6 +13,7 @@ function InputPanel(props: InputPanelProps) {
   let commands = {
     PLACE: "PLACE",
     MOVE: "MOVE",
+    LEFT: "LEFT",
   };
 
   let directions = {
@@ -105,6 +106,7 @@ function InputPanel(props: InputPanelProps) {
           !placeArgs?.direction
         );
       case commands.MOVE:
+      case commands.LEFT:
         if (!robotState) {
           alert("Robot is not yet placed !!!");
           return true;
@@ -120,6 +122,7 @@ function InputPanel(props: InputPanelProps) {
       case commands.PLACE:
         return showPlaceArgs();
       case commands.MOVE:
+      case commands.LEFT:
       default:
         return <></>;
     }
@@ -182,6 +185,26 @@ function InputPanel(props: InputPanelProps) {
                 alert("Invalid attempt !!!");
               }
             }
+            break;
+        }
+        break;
+      case commands.LEFT:
+        if (!robotState) {
+          alert("Robot is not yet placed !!!");
+          break;
+        }
+        switch (robotState.direction) {
+          case directions.NORTH:
+            updateRobotState(robotState.x, robotState.y, directions.WEST);
+            break;
+          case directions.EAST:
+            updateRobotState(robotState.x, robotState.y, directions.NORTH);
+            break;
+          case directions.SOUTH:
+            updateRobotState(robotState.x, robotState.y, directions.EAST);
+            break;
+          case directions.WEST:
+            updateRobotState(robotState.x, robotState.y, directions.SOUTH);
             break;
         }
         break;
