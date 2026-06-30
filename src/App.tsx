@@ -4,8 +4,14 @@ import Board, { type BoardDimensions } from "./components/Board";
 import InputPanel from "./components/InputPanel";
 import OutputPanel from "./components/OutputPanel";
 
+export type RobotState = {
+  x: number;
+  y: number;
+  direction: string;
+};
+
 function App() {
-  const [robotSate, setRobotSate] = useState<any>(null);
+  const [robotSate, setRobotSate] = useState<null | RobotState>(null);
   const dimensions: BoardDimensions = {
     x: 5,
     y: 5,
@@ -21,6 +27,7 @@ function App() {
       <InputPanel
         boardDimensions={dimensions}
         updateRobotState={onUpdateRobotState}
+        robotState={robotSate}
       />
       <Board dimensions={dimensions} robot={robotSate} />
       <OutputPanel />
