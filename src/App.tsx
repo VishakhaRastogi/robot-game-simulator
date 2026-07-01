@@ -4,10 +4,11 @@ import Board, { type BoardDimensions } from "./components/Board";
 import InputPanel from "./components/InputPanel";
 import OutputPanel from "./components/OutputPanel";
 
+export type Direction = "NORTH" | "EAST" | "SOUTH" | "WEST";
 export type RobotState = {
   x: number;
   y: number;
-  direction: string;
+  direction: Direction;
 };
 
 function App() {
@@ -17,7 +18,7 @@ function App() {
     y: 5,
   };
 
-  const onUpdateRobotState = (x: number, y: number, direction: string) => {
+  const onUpdateRobotState = (x: number, y: number, direction: Direction) => {
     setRobotSate({ x: x, y: y, direction: direction });
   };
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { BoardDimensions } from "./Board";
-import type { RobotState } from "../App";
+import type { Direction, RobotState } from "../App";
 
 type InputPanelProps = {
   boardDimensions: BoardDimensions;
@@ -8,14 +8,17 @@ type InputPanelProps = {
   robotState: null | RobotState;
 };
 
+type Commands = "PLACE" | "MOVE" | "LEFT";
+
 function InputPanel(props: InputPanelProps) {
   let { boardDimensions, updateRobotState, robotState } = props;
-  let commands = {
+  let commands: Record<string, Commands> = {
     PLACE: "PLACE",
     MOVE: "MOVE",
+    LEFT: "LEFT",
   };
 
-  let directions = {
+  let directions: Record<string, Direction> = {
     NORTH: "NORTH",
     EAST: "EAST",
     SOUTH: "SOUTH",
@@ -86,7 +89,7 @@ function InputPanel(props: InputPanelProps) {
             <option value={""} disabled hidden>
               Please select direction
             </option>
-            {Object.keys(directions).map((direction) => {
+            {Object.values(directions).map((direction) => {
               return <option value={direction}>{direction}</option>;
             })}
           </select>
@@ -105,6 +108,7 @@ function InputPanel(props: InputPanelProps) {
           !placeArgs?.direction
         );
       case commands.MOVE:
+      case commands.LEFT:
         if (!robotState) {
           alert("Robot is not yet placed !!!");
           return true;
@@ -120,6 +124,7 @@ function InputPanel(props: InputPanelProps) {
       case commands.PLACE:
         return showPlaceArgs();
       case commands.MOVE:
+      case commands.LEFT:
       default:
         return <></>;
     }
@@ -185,6 +190,26 @@ function InputPanel(props: InputPanelProps) {
             break;
         }
         break;
+      case commands.LEFT:
+        if (!robotState) {
+          alert("Robot is not yet placed !!!");
+          break;
+        }
+        switch (robotState.direction) {
+          case directions.NORTH:
+            updateRobotState(robotState.x, robotState.y, directions.WEST);
+            break;
+          case directions.EAST:
+            updateRobotState(robotState.x, robotState.y, directions.NORTH);
+            break;
+          case directions.SOUTH:
+            updateRobotState(robotState.x, robotState.y, directions.EAST);
+            break;
+          case directions.WEST:
+            updateRobotState(robotState.x, robotState.y, directions.SOUTH);
+            break;
+        }
+        break;
       default:
         alert("Invalid attempt !!!");
     }
@@ -203,7 +228,7 @@ function InputPanel(props: InputPanelProps) {
             <option value={""} disabled hidden>
               Please select command
             </option>
-            {Object.keys(commands).map((cmd) => {
+            {Object.values(commands).map((cmd) => {
               return <option value={cmd}>{cmd}</option>;
             })}
           </select>

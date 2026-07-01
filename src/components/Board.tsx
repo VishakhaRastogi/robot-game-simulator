@@ -1,3 +1,5 @@
+import type { Direction, RobotState } from "../App";
+
 export type BoardDimensions = {
   x: number;
   y: number;
@@ -5,7 +7,7 @@ export type BoardDimensions = {
 
 type BoardProps = {
   dimensions: BoardDimensions;
-  robot: any;
+  robot: null | RobotState;
 };
 
 function Board(props: BoardProps) {
@@ -26,6 +28,13 @@ function Board(props: BoardProps) {
       board.push(row);
     }
 
+    const facing: Record<Direction, string> = {
+      NORTH: "^",
+      EAST: ">",
+      SOUTH: "v",
+      WEST: "<",
+    };
+
     return (
       <>
         {board.map((row) => {
@@ -35,7 +44,9 @@ function Board(props: BoardProps) {
                 {row.map((cell) => {
                   return (
                     <span key={cell.toString()} style={{ padding: "5px" }}>
-                      {cell == "true" ? "robo" : "#" + cell}
+                      {cell == "true" && robot
+                        ? "robo " + facing[robot.direction]
+                        : "#" + cell}
                     </span>
                   );
                 })}
