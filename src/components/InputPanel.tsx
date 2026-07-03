@@ -6,19 +6,29 @@ type InputPanelProps = {
   boardDimensions: BoardDimensions;
   updateRobotState: Function;
   robotState: null | RobotState;
+  onReport: Function;
+  updateMessage: Function;
 };
 
-type Commands = "PLACE" | "MOVE" | "LEFT";
+type Commands = "PLACE" | "MOVE" | "LEFT" | "RIGHT" | "REPORT";
 
 function InputPanel(props: InputPanelProps) {
-  let { boardDimensions, updateRobotState, robotState } = props;
-  let commands: Record<string, Commands> = {
+  let {
+    boardDimensions,
+    updateRobotState,
+    robotState,
+    onReport,
+    updateMessage,
+  } = props;
+  let commands: Record<Commands, Commands> = {
     PLACE: "PLACE",
     MOVE: "MOVE",
     LEFT: "LEFT",
+    RIGHT: "RIGHT",
+    REPORT: "REPORT",
   };
 
-  let directions: Record<string, Direction> = {
+  let directions: Record<Direction, Direction> = {
     NORTH: "NORTH",
     EAST: "EAST",
     SOUTH: "SOUTH",
@@ -109,8 +119,10 @@ function InputPanel(props: InputPanelProps) {
         );
       case commands.MOVE:
       case commands.LEFT:
+      case commands.RIGHT:
+      case commands.REPORT:
         if (!robotState) {
-          alert("Robot is not yet placed !!!");
+          updateMessage("Robot is not yet placed !!!");
           return true;
         }
         return false;
@@ -143,7 +155,7 @@ function InputPanel(props: InputPanelProps) {
         break;
       case commands.MOVE:
         if (!robotState) {
-          alert("Robot is not yet placed !!!");
+          updateMessage("Robot is not yet placed !!!");
           break;
         }
         switch (robotState.direction) {
@@ -153,7 +165,7 @@ function InputPanel(props: InputPanelProps) {
               if (newY < boardDimensions.y) {
                 updateRobotState(robotState.x, newY, robotState.direction);
               } else {
-                alert("Invalid attempt !!!");
+                updateMessage("Invalid attempt !!!");
               }
             }
             break;
@@ -163,7 +175,7 @@ function InputPanel(props: InputPanelProps) {
               if (newX < boardDimensions.x) {
                 updateRobotState(newX, robotState.y, robotState.direction);
               } else {
-                alert("Invalid attempt !!!");
+                updateMessage("Invalid attempt !!!");
               }
             }
             break;
@@ -173,7 +185,7 @@ function InputPanel(props: InputPanelProps) {
               if (0 <= newY) {
                 updateRobotState(robotState.x, newY, robotState.direction);
               } else {
-                alert("Invalid attempt !!!");
+                updateMessage("Invalid attempt !!!");
               }
             }
             break;
@@ -184,7 +196,7 @@ function InputPanel(props: InputPanelProps) {
               if (0 <= newX) {
                 updateRobotState(newX, robotState.y, robotState.direction);
               } else {
-                alert("Invalid attempt !!!");
+                updateMessage("Invalid attempt !!!");
               }
             }
             break;
@@ -192,7 +204,7 @@ function InputPanel(props: InputPanelProps) {
         break;
       case commands.LEFT:
         if (!robotState) {
-          alert("Robot is not yet placed !!!");
+          updateMessage("Robot is not yet placed !!!");
           break;
         }
         switch (robotState.direction) {
@@ -210,8 +222,31 @@ function InputPanel(props: InputPanelProps) {
             break;
         }
         break;
+      case commands.RIGHT:
+        if (!robotState) {
+          updateMessage("Robot is not yet placed !!!");
+          break;
+        }
+        switch (robotState.direction) {
+          case directions.NORTH:
+            updateRobotState(robotState.x, robotState.y, directions.EAST);
+            break;
+          case directions.EAST:
+            updateRobotState(robotState.x, robotState.y, directions.SOUTH);
+            break;
+          case directions.SOUTH:
+            updateRobotState(robotState.x, robotState.y, directions.WEST);
+            break;
+          case directions.WEST:
+            updateRobotState(robotState.x, robotState.y, directions.NORTH);
+            break;
+        }
+        break;
+      case commands.REPORT:
+        onReport();
+        break;
       default:
-        alert("Invalid attempt !!!");
+        updateMessage("Invalid attempt !!!");
     }
   };
 
