@@ -13,6 +13,7 @@ export type RobotState = {
 
 function App() {
   const [robotSate, setRobotSate] = useState<null | RobotState>(null);
+  const [message, setMessage] = useState<string>("");
   const dimensions: BoardDimensions = {
     x: 5,
     y: 5,
@@ -20,6 +21,19 @@ function App() {
 
   const onUpdateRobotState = (x: number, y: number, direction: Direction) => {
     setRobotSate({ x: x, y: y, direction: direction });
+    updateMessage("");
+  };
+
+  const updateMessage = (msg: string) => {
+    setMessage(msg);
+  };
+
+  const onReport = () => {
+    if (!robotSate) setMessage("Robot is not placed yet.");
+    else {
+      let msg = robotSate.x + ", " + robotSate.y + ", " + robotSate.direction;
+      setMessage(msg);
+    }
   };
 
   return (
@@ -29,9 +43,11 @@ function App() {
         boardDimensions={dimensions}
         updateRobotState={onUpdateRobotState}
         robotState={robotSate}
+        onReport={onReport}
+        updateMessage={updateMessage}
       />
       <Board dimensions={dimensions} robot={robotSate} />
-      <OutputPanel />
+      <OutputPanel message={message} />
     </>
   );
 }
