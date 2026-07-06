@@ -10,7 +10,8 @@ type InputPanelProps = {
   updateMessage: Function;
 };
 
-type Commands = "PLACE" | "MOVE" | "LEFT" | "RIGHT" | "REPORT";
+export type Commands = "PLACE" | "MOVE" | "LEFT" | "RIGHT" | "REPORT";
+export type Rotate = "LEFT" | "RIGHT";
 
 function InputPanel(props: InputPanelProps) {
   let {
@@ -121,14 +122,73 @@ function InputPanel(props: InputPanelProps) {
       case commands.LEFT:
       case commands.RIGHT:
       case commands.REPORT:
-        if (!robotState) {
-          updateMessage("Robot is not yet placed !!!");
-          return true;
-        }
-        return false;
+        return !isRobotPlaced();
       default:
         return true;
     }
+  };
+
+  const updateRobotPosition = (x: number, y: number, direction: string) => {
+    updateRobotState({ x: x, y: y, direction: direction });
+  };
+
+  const isRobotPlaced = () => {
+    return !!robotState;
+  };
+
+  const isMoveValid = (newPosition: RobotState) => {
+    return (
+      0 <= newPosition.x &&
+      newPosition.x < boardDimensions.x &&
+      0 <= newPosition.y &&
+      newPosition.y < boardDimensions.y
+    );
+  };
+
+  const moveRobot = (currentState: RobotState) => {
+    switch (currentState.direction) {
+      case "NORTH":
+        currentState.y++;
+        break;
+      case "EAST":
+        currentState.x++;
+        break;
+      case "SOUTH":
+        currentState.y--;
+        break;
+      case "WEST":
+        currentState.x--;
+        break;
+    }
+    if (isMoveValid(currentState)) {
+      updateRobotPosition(
+        currentState.x,
+        currentState.y,
+        currentState.direction,
+      );
+    } else {
+      updateMessage("Invalid Attempt!!!");
+    }
+  };
+
+  const rotateRobot = (currentState: RobotState, to: Rotate) => {
+    let rotation: Record<Rotate, Record<Direction, Direction>> = {
+      LEFT: {
+        NORTH: "WEST",
+        EAST: "NORTH",
+        SOUTH: "EAST",
+        WEST: "SOUTH",
+      },
+      RIGHT: {
+        NORTH: "EAST",
+        EAST: "SOUTH",
+        SOUTH: "WEST",
+        WEST: "NORTH",
+      },
+    };
+
+    currentState.direction = rotation[to][currentState.direction];
+    updateRobotPosition(currentState.x, currentState.y, currentState.direction);
   };
 
   const showArgs = () => {
@@ -138,7 +198,7 @@ function InputPanel(props: InputPanelProps) {
       case commands.MOVE:
       case commands.LEFT:
       default:
-        return <></>;
+        return <>{!isRobotPlaced() && "Robot is not placed yet!!!"}</>;
     }
   };
 
@@ -151,96 +211,16 @@ function InputPanel(props: InputPanelProps) {
           placeArgs.y != undefined &&
           placeArgs.direction
         )
-          updateRobotState(placeArgs.x, placeArgs.y, placeArgs.direction);
+          updateRobotPosition(placeArgs.x, placeArgs.y, placeArgs.direction);
         break;
       case commands.MOVE:
-        if (!robotState) {
-          updateMessage("Robot is not yet placed !!!");
-          break;
-        }
-        switch (robotState.direction) {
-          case directions.NORTH: //north
-            {
-              let newY = robotState.y + 1;
-              if (newY < boardDimensions.y) {
-                updateRobotState(robotState.x, newY, robotState.direction);
-              } else {
-                updateMessage("Invalid attempt !!!");
-              }
-            }
-            break;
-          case directions.EAST: //east
-            {
-              let newX = robotState.x + 1;
-              if (newX < boardDimensions.x) {
-                updateRobotState(newX, robotState.y, robotState.direction);
-              } else {
-                updateMessage("Invalid attempt !!!");
-              }
-            }
-            break;
-          case directions.SOUTH: //south
-            {
-              let newY = robotState.y - 1;
-              if (0 <= newY) {
-                updateRobotState(robotState.x, newY, robotState.direction);
-              } else {
-                updateMessage("Invalid attempt !!!");
-              }
-            }
-            break;
-          case directions.WEST:
-            {
-              //west
-              let newX = robotState.x - 1;
-              if (0 <= newX) {
-                updateRobotState(newX, robotState.y, robotState.direction);
-              } else {
-                updateMessage("Invalid attempt !!!");
-              }
-            }
-            break;
-        }
+        robotState && moveRobot(robotState);
         break;
       case commands.LEFT:
-        if (!robotState) {
-          updateMessage("Robot is not yet placed !!!");
-          break;
-        }
-        switch (robotState.direction) {
-          case directions.NORTH:
-            updateRobotState(robotState.x, robotState.y, directions.WEST);
-            break;
-          case directions.EAST:
-            updateRobotState(robotState.x, robotState.y, directions.NORTH);
-            break;
-          case directions.SOUTH:
-            updateRobotState(robotState.x, robotState.y, directions.EAST);
-            break;
-          case directions.WEST:
-            updateRobotState(robotState.x, robotState.y, directions.SOUTH);
-            break;
-        }
+        robotState && rotateRobot(robotState, "LEFT");
         break;
       case commands.RIGHT:
-        if (!robotState) {
-          updateMessage("Robot is not yet placed !!!");
-          break;
-        }
-        switch (robotState.direction) {
-          case directions.NORTH:
-            updateRobotState(robotState.x, robotState.y, directions.EAST);
-            break;
-          case directions.EAST:
-            updateRobotState(robotState.x, robotState.y, directions.SOUTH);
-            break;
-          case directions.SOUTH:
-            updateRobotState(robotState.x, robotState.y, directions.WEST);
-            break;
-          case directions.WEST:
-            updateRobotState(robotState.x, robotState.y, directions.NORTH);
-            break;
-        }
+        robotState && rotateRobot(robotState, "RIGHT");
         break;
       case commands.REPORT:
         onReport();
